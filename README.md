@@ -1,6 +1,13 @@
 
 # PHP_Laravel12_Crud_Using_API_Routes
 
+<p align="center">
+  <img src="https://img.shields.io/badge/Laravel-12.x-FF2D20?style=for-the-badge&logo=laravel">
+  <img src="https://img.shields.io/badge/React-18.x-61DAFB?style=for-the-badge&logo=react">
+  <img src="https://img.shields.io/badge/Inertia.js-SPA-blueviolet?style=for-the-badge">
+  <img src="https://img.shields.io/badge/Google%20Maps-Footer-success?style=for-the-badge">
+</p>
+
 ---
 
 ##  Overview
