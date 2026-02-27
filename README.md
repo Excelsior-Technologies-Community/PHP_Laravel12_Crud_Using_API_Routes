@@ -1,59 +1,436 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+
+# PHP_Laravel12_Crud_Using_API_Routes
 
 <p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
+  <img src="https://img.shields.io/badge/Laravel-12.x-red?style=for-the-badge&logo=laravel">
+  <img src="https://img.shields.io/badge/PHP-8%2B-blue?style=for-the-badge&logo=php">
+  <img src="https://img.shields.io/badge/API-REST-green?style=for-the-badge">
+  <img src="https://img.shields.io/badge/Blade-Views-orange?style=for-the-badge&logo=laravel">
+  <img src="https://img.shields.io/badge/MySQL-Database-lightgrey?style=for-the-badge&logo=mysql">
 </p>
 
-## About Laravel
+---
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+##  Overview
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+✔ Product management using REST APIs  
+✔ Blade UI consuming APIs using Fetch API  
+✔ Separate API & Web routes  
+✔ Simple CRUD flow (Create, Read, Update, Delete)  
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+This project is built using **Laravel 12** and demonstrates how to use  
+**API routes with Blade views** without any frontend framework.
 
-## Learning Laravel
+---
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
+##  Features
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+- Laravel 12 latest structure  
+- REST API based Product CRUD  
+- Blade views (main logic only, no CSS)  
+- JavaScript Fetch API usage  
+- MySQL database integration  
+- Clean MVC architecture  
+- Beginner friendly project  
 
-## Laravel Sponsors
+---
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+##  Folder Structure
 
-### Premium Partners
+```text
+product-crud/
+│
+├── app/
+│   ├── Http/
+│   │   └── Controllers/
+│   │       └── ProductController.php
+│   │
+│   └── Models/
+│       └── Product.php
+│
+├── database/
+│   └── migrations/
+│       └── xxxx_create_products_table.php
+│
+├── resources/
+│   └── views/
+│       └── products/
+│           ├── index.blade.php
+│           ├── create.blade.php
+│           └── edit.blade.php
+│
+├── routes/
+│   ├── api.php
+│   └── web.php
+│
+├── .env
+├── artisan
+├── composer.json
+└── README.md
+```
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+---
 
-## Contributing
+##  Step 1 — Install Laravel 12
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+```bash
+composer create-project laravel/laravel product-crud "12.*"
+```
 
-## Code of Conduct
+Application URL:
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+```
+http://127.0.0.1:8000
+```
 
-## Security Vulnerabilities
+---
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+##  Step 2 — Database Configuration
 
-## License
+```env
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=api
+DB_USERNAME=root
+DB_PASSWORD=
+```
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+Create database manually:
+
+```
+api
+```
+
+---
+
+##  Step 3 — Product Migration & Table
+
+```bash
+php artisan make:model Product -m
+```
+
+```php
+public function up(): void
+{
+    Schema::create('products', function (Blueprint $table) {
+        $table->id();
+        $table->string('name');
+        $table->text('detail')->nullable();
+        $table->decimal('price', 10, 2);
+        $table->timestamps();
+    });
+}
+```
+
+```bash
+php artisan migrate
+```
+
+---
+
+##  Step 4 — Product Model
+
+```php
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Model;
+
+class Product extends Model
+{
+    protected $fillable = [
+        'name',
+        'detail',
+        'price'
+    ];
+}
+```
+
+---
+
+##  Step 5 — Product Controller (API)
+
+```php
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Models\Product;
+use Illuminate\Http\Request;
+
+class ProductController extends Controller
+{
+    public function index()
+    {
+        return response()->json([
+            'status' => true,
+            'data' => Product::latest()->get()
+        ]);
+    }
+
+    public function store(Request $request)
+    {
+        $request->validate([
+            'name'  => 'required',
+            'price' => 'required|numeric'
+        ]);
+
+        $product = Product::create(
+            $request->only('name', 'detail', 'price')
+        );
+
+        return response()->json([
+            'status' => true,
+            'message' => 'Product created successfully'
+        ], 201);
+    }
+
+    public function show($id)
+    {
+        return response()->json([
+            'status' => true,
+            'data' => Product::findOrFail($id)
+        ]);
+    }
+
+    public function update(Request $request, $id)
+    {
+        $product = Product::findOrFail($id);
+
+        $product->update(
+            $request->only('name', 'detail', 'price')
+        );
+
+        return response()->json([
+            'status' => true,
+            'message' => 'Product updated successfully'
+        ]);
+    }
+
+    public function destroy($id)
+    {
+        Product::findOrFail($id)->delete();
+
+        return response()->json([
+            'status' => true,
+            'message' => 'Product deleted successfully'
+        ]);
+    }
+}
+```
+
+---
+
+##  Step 6 — API Routes
+
+```php
+Route::get('/products', [ProductController::class, 'index']);
+Route::post('/products', [ProductController::class, 'store']);
+Route::get('/products/{id}', [ProductController::class, 'show']);
+Route::put('/products/{id}', [ProductController::class, 'update']);
+Route::delete('/products/{id}', [ProductController::class, 'destroy']);
+```
+
+---
+
+##  Step 7 — Web Routes
+
+```php
+Route::view('/products', 'products.index');
+Route::view('/products/create', 'products.create');
+Route::view('/products/edit/{id}', 'products.edit');
+```
+
+---
+
+##  Step 8 — Blade Files 
+
+### resources/views/products/index.blade.php
+```html
+<!DOCTYPE html>
+<html>
+<head><title>Products</title></head>
+<body>
+
+<h2>Products</h2>
+<a href="/products/create">Add Product</a>
+
+<table border="1">
+<thead>
+<tr>
+<th>ID</th><th>Name</th><th>Detail</th><th>Price</th><th>Action</th>
+</tr>
+</thead>
+<tbody id="rows"></tbody>
+</table>
+
+<script>
+fetch('/api/products')
+.then(res=>res.json())
+.then(res=>{
+let html='';
+res.data.forEach(p=>{
+html+=`<tr>
+<td>${p.id}</td>
+<td>${p.name}</td>
+<td>${p.detail ?? ''}</td>
+<td>${p.price}</td>
+<td>
+<a href="/products/edit/${p.id}">Edit</a>
+<button onclick="del(${p.id})">Delete</button>
+</td>
+</tr>`;
+});
+rows.innerHTML=html;
+});
+
+function del(id){
+fetch('/api/products/'+id,{method:'DELETE'}).then(()=>location.reload());
+}
+</script>
+
+</body>
+</html>
+```
+
+### resources/views/products/create.blade.php
+```html
+<!DOCTYPE html>
+<html>
+<head><title>Create</title></head>
+<body>
+
+<form id="form">
+<input id="name" placeholder="Name"><br>
+<textarea id="detail"></textarea><br>
+<input id="price" type="number"><br>
+<button>Save</button>
+</form>
+
+<script>
+form.onsubmit=e=>{
+e.preventDefault();
+fetch('/api/products',{
+method:'POST',
+headers:{'Content-Type':'application/json'},
+body:JSON.stringify({
+name:name.value,
+detail:detail.value,
+price:price.value
+})
+}).then(()=>location.href='/products');
+}
+</script>
+
+</body>
+</html>
+```
+
+### resources/views/products/edit.blade.php
+```html
+<!DOCTYPE html>
+<html>
+<head><title>Edit</title></head>
+<body>
+
+<form id="form">
+<input id="name"><br>
+<textarea id="detail"></textarea><br>
+<input id="price" type="number"><br>
+<button>Update</button>
+</form>
+
+<script>
+const id=location.pathname.split('/').pop();
+
+fetch('/api/products/'+id)
+.then(res=>res.json())
+.then(res=>{
+name.value=res.data.name;
+detail.value=res.data.detail;
+price.value=res.data.price;
+});
+
+form.onsubmit=e=>{
+e.preventDefault();
+fetch('/api/products/'+id,{
+method:'PUT',
+headers:{'Content-Type':'application/json'},
+body:JSON.stringify({
+name:name.value,
+detail:detail.value,
+price:price.value
+})
+}).then(()=>location.href='/products');
+}
+</script>
+
+</body>
+</html>
+```
+
+---
+
+##  Step 9 — Postman API Testing
+
+Create Product  
+POST  
+http://127.0.0.1:8000/api/products
+
+```json
+{
+  "name": "MOBILE",
+  "detail": "64 GB",
+  "price": 50000
+}
+
+```
+<img width="809" height="882" alt="Screenshot 2025-12-22 123509" src="https://github.com/user-attachments/assets/bb8507e4-2ed8-4979-9acf-9f96d1efd8bf" />
+
+
+Update Product  
+PUT  
+http://127.0.0.1:8000/api/products/6
+
+```json
+{
+  "name": "MOBILE",
+  "detail": "64 GB , Oneplus ",
+  "price": 50000
+}
+```
+<img width="773" height="857" alt="Screenshot 2025-12-22 123609" src="https://github.com/user-attachments/assets/3b3bd80e-8d6b-49f1-93a2-d702df6adfcf" />
+
+
+Delete Product  
+DELETE  
+http://127.0.0.1:8000/api/products/6
+
+<img width="752" height="729" alt="Screenshot 2025-12-22 123624" src="https://github.com/user-attachments/assets/0d3cf5d5-2390-4881-9f5f-551b482bee2a" />
+
+
+List Product  
+GET  
+http://127.0.0.1:8000/api/products
+
+<img width="805" height="942" alt="Screenshot 2025-12-22 123402" src="https://github.com/user-attachments/assets/1e974d68-efb8-41b1-8f68-c07d0ea80d6f" />
+
+
+##   Frontend Side:-
+
+Index Product(Blade View)
+
+<img width="1188" height="494" alt="Screenshot 2025-12-22 123648" src="https://github.com/user-attachments/assets/2a790423-2382-4fd1-92fa-06642282b43d" />
+
+Create Product(Blade View) 
+
+<img width="671" height="512" alt="Screenshot 2025-12-22 130858" src="https://github.com/user-attachments/assets/2d455ab9-87b7-4e63-aed9-4a443242359a" />
+
+Edit Product(Blade View) 
+
+<img width="690" height="537" alt="Screenshot 2025-12-22 130908" src="https://github.com/user-attachments/assets/0169d5a1-1f8f-4eb0-a01c-f5cdda8360cc" />
+
+
+
