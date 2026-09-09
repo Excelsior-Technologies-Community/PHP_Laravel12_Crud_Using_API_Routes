@@ -60,26 +60,91 @@
 </div>
 
 <script>
-const API = "/api/products"; // API base URL
 
-// Submit create form
+const API = "/api/products";
+
+const form = document.getElementById('form');
+
 form.onsubmit = e => {
+
     e.preventDefault();
 
+    const button = form.querySelector('button');
+
+    button.disabled = true;
+    button.innerText = 'Saving...';
+
+
     fetch(API, {
+
         method: 'POST',
+
         headers: {
-            'Content-Type':'application/json',
-            'Accept':'application/json'
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
         },
+
         body: JSON.stringify({
-            name: document.getElementById('product_name').value,
-            detail: document.getElementById('detail').value,
-            price: document.getElementById('price').value
+
+            name:
+                document.getElementById('product_name').value,
+
+            detail:
+                document.getElementById('detail').value,
+
+            price:
+                document.getElementById('price').value
+
         })
+
     })
-    .then(() => location.href = "/products"); // Redirect after save
+
+    .then(async response => {
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            throw data;
+        }
+
+        return data;
+
+    })
+
+    .then(response => {
+
+        alert(response.message);
+
+        location.href = "/products";
+
+    })
+
+    .catch(error => {
+
+        console.error(error);
+
+        if (error.errors) {
+
+            const messages =
+                Object.values(error.errors)
+                    .flat()
+                    .join('\n');
+
+            alert(messages);
+
+        } else {
+
+            alert('Unable to create product.');
+
+        }
+
+        button.disabled = false;
+        button.innerText = 'Save Product';
+
+    });
+
 };
+
 </script>
 
 </body>
