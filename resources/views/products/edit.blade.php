@@ -63,36 +63,150 @@
 </div>
 
 <script>
-const API = "/api/products"; // API base URL
-const ID = location.pathname.split('/').pop(); // Get product ID
 
-// Load product data
-fetch(`${API}/${ID}`)
-.then(res => res.json())
-.then(res => {
-    document.getElementById('product_name').value = res.data.name;
-    document.getElementById('detail').value = res.data.detail ?? '';
-    document.getElementById('price').value = res.data.price;
+const API = "/api/products";
+
+const ID = location.pathname.split('/').pop();
+
+const form = document.getElementById('form');
+
+
+// ==========================================
+// Load Product
+// ==========================================
+
+fetch(`${API}/${ID}`, {
+
+    headers: {
+        'Accept': 'application/json'
+    }
+
+})
+
+.then(response => {
+
+    if (!response.ok) {
+        throw new Error('Product not found');
+    }
+
+    return response.json();
+
+})
+
+.then(response => {
+
+    document.getElementById('product_name').value =
+        response.data.name;
+
+    document.getElementById('detail').value =
+        response.data.detail ?? '';
+
+    document.getElementById('price').value =
+        response.data.price;
+
+})
+
+.catch(error => {
+
+    console.error(error);
+
+    alert('Unable to load product.');
+
+    location.href = '/products';
+
 });
 
-// Submit update form
+
+// ==========================================
+// Update Product
+// ==========================================
+
 form.onsubmit = e => {
+
     e.preventDefault();
 
-    fetch(`${API}/${ID}`, {
-        method: 'PUT',
-        headers: {
-            'Content-Type':'application/json',
-            'Accept':'application/json'
-        },
-        body: JSON.stringify({
-            name: document.getElementById('product_name').value,
-            detail: detail.value,
-            price: price.value
-        })
-    }).then(() => location.href = "/products"); // Redirect after update
-};
-</script>
+    const button =
+        form.querySelector('button');
 
+    button.disabled = true;
+
+    button.innerText = 'Updating...';
+
+
+    fetch(`${API}/${ID}`, {
+
+        method: 'PUT',
+
+        headers: {
+
+            'Content-Type': 'application/json',
+
+            'Accept': 'application/json'
+
+        },
+
+        body: JSON.stringify({
+
+            name:
+                document.getElementById('product_name').value,
+
+            detail:
+                document.getElementById('detail').value,
+
+            price:
+                document.getElementById('price').value
+
+        })
+
+    })
+
+    .then(async response => {
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            throw data;
+        }
+
+        return data;
+
+    })
+
+    .then(response => {
+
+        alert(response.message);
+
+        location.href = '/products';
+
+    })
+
+    .catch(error => {
+
+        console.error(error);
+
+        if (error.errors) {
+
+            const messages =
+                Object.values(error.errors)
+                    .flat()
+                    .join('\n');
+
+            alert(messages);
+
+        } else {
+
+            alert('Unable to update product.');
+
+        }
+
+        button.disabled = false;
+
+        button.innerText = 'Update Product';
+
+    });
+
+};
+
+</script>
 </body>
 </html>
