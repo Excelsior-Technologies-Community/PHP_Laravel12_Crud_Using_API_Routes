@@ -4,33 +4,145 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ProductController;
 
 
-// 📊 Product Statistics
-Route::get('/products/statistics', [ProductController::class, 'statistics']);
+/*
+|--------------------------------------------------------------------------
+| Product Statistics
+|--------------------------------------------------------------------------
+*/
+
+Route::get(
+    '/products/statistics',
+    [ProductController::class, 'statistics']
+);
 
 
-// 🔎 GET: Products
-// Supports:
-// /api/products
-// /api/products?search=mobile
-// /api/products?min_price=1000
-// /api/products?max_price=50000
-// /api/products?search=mobile&min_price=10000&max_price=50000
-// /api/products?page=2
-Route::get('/products', [ProductController::class, 'index']);
+/*
+|--------------------------------------------------------------------------
+| Product Trash
+|--------------------------------------------------------------------------
+*/
+
+Route::get(
+    '/products/trash',
+    [ProductController::class, 'trash']
+);
 
 
-// POST: Create Product
-Route::post('/products', [ProductController::class, 'store']);
+/*
+|--------------------------------------------------------------------------
+| Product CSV Export
+|--------------------------------------------------------------------------
+*/
 
-Route::get('/products/statistics', [ProductController::class, 'statistics']);
-
-// GET: Single Product
-Route::get('/products/{id}', [ProductController::class, 'show']);
-
-
-// PUT: Update Product
-Route::put('/products/{id}', [ProductController::class, 'update']);
+Route::get(
+    '/products/export',
+    [ProductController::class, 'exportCsv']
+);
 
 
-// DELETE: Product
-Route::delete('/products/{id}', [ProductController::class, 'destroy']);
+/*
+|--------------------------------------------------------------------------
+| Bulk Delete
+|--------------------------------------------------------------------------
+*/
+
+Route::post(
+    '/products/bulk-delete',
+    [ProductController::class, 'bulkDelete']
+);
+
+
+/*
+|--------------------------------------------------------------------------
+| Restore Product
+|--------------------------------------------------------------------------
+*/
+
+Route::post(
+    '/products/{id}/restore',
+    [ProductController::class, 'restore']
+);
+
+
+/*
+|--------------------------------------------------------------------------
+| Permanently Delete
+|--------------------------------------------------------------------------
+*/
+
+Route::delete(
+    '/products/{id}/force-delete',
+    [ProductController::class, 'forceDelete']
+);
+
+
+/*
+|--------------------------------------------------------------------------
+| Toggle Active / Inactive
+|--------------------------------------------------------------------------
+*/
+
+Route::patch(
+    '/products/{id}/toggle-status',
+    [ProductController::class, 'toggleStatus']
+);
+
+
+/*
+|--------------------------------------------------------------------------
+| Products
+|--------------------------------------------------------------------------
+*/
+
+Route::get(
+    '/products',
+    [ProductController::class, 'index']
+);
+
+
+/*
+|--------------------------------------------------------------------------
+| Create Product
+|--------------------------------------------------------------------------
+*/
+
+Route::post(
+    '/products',
+    [ProductController::class, 'store']
+);
+
+
+/*
+|--------------------------------------------------------------------------
+| Single Product
+|--------------------------------------------------------------------------
+*/
+
+Route::get(
+    '/products/{id}',
+    [ProductController::class, 'show']
+);
+
+
+/*
+|--------------------------------------------------------------------------
+| Update Product
+|--------------------------------------------------------------------------
+*/
+
+Route::put(
+    '/products/{id}',
+    [ProductController::class, 'update']
+);
+
+
+/*
+|--------------------------------------------------------------------------
+| Delete Product
+|--------------------------------------------------------------------------
+*/
+
+Route::delete(
+    '/products/{id}',
+    [ProductController::class, 'destroy']
+);
