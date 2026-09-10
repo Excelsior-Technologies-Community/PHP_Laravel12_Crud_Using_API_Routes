@@ -2,6 +2,7 @@
 <html>
 <head>
     <title>Edit Product</title>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <style>
         body {
@@ -58,6 +59,10 @@
         <label>Price</label>
         <input id="price" type="number">
 
+        <label>Product image</label>
+        <input id="image" type="file" accept="image/jpeg,image/png,image/webp">
+        <img id="current_image" alt="Current product image" style="display:none;max-width:120px;margin-bottom:12px">
+
         <button>Update Product</button>
     </form>
 </div>
@@ -104,6 +109,12 @@ fetch(`${API}/${ID}`, {
     document.getElementById('price').value =
         response.data.price;
 
+    if (response.data.image_path) {
+        const image = document.getElementById('current_image');
+        image.src = `/storage/${response.data.image_path}`;
+        image.style.display = 'block';
+    }
+
 })
 
 .catch(error => {
@@ -133,30 +144,25 @@ form.onsubmit = e => {
     button.innerText = 'Updating...';
 
 
+    const formData = new FormData();
+    formData.append('_method', 'PUT');
+    formData.append('name', document.getElementById('product_name').value);
+    formData.append('detail', document.getElementById('detail').value);
+    formData.append('price', document.getElementById('price').value);
+    const image = document.getElementById('image').files[0];
+    if (image) formData.append('image', image);
+
     fetch(`${API}/${ID}`, {
 
-        method: 'PUT',
+        method: 'POST',
 
         headers: {
-
-            'Content-Type': 'application/json',
 
             'Accept': 'application/json'
 
         },
 
-        body: JSON.stringify({
-
-            name:
-                document.getElementById('product_name').value,
-
-            detail:
-                document.getElementById('detail').value,
-
-            price:
-                document.getElementById('price').value
-
-        })
+        body: formData
 
     })
 
@@ -174,9 +180,13 @@ form.onsubmit = e => {
 
     .then(response => {
 
-        alert(response.message);
-
-        location.href = '/products';
+        Swal.fire({
+            icon: 'success',
+            title: 'Product updated',
+            text: response.message,
+            timer: 1400,
+            showConfirmButton: false
+        }).then(() => location.href = '/products');
 
     })
 
@@ -191,11 +201,11 @@ form.onsubmit = e => {
                     .flat()
                     .join('\n');
 
-            alert(messages);
+            Swal.fire('Validation error', messages, 'error');
 
         } else {
 
-            alert('Unable to update product.');
+            Swal.fire('Error', 'Unable to update product.', 'error');
 
         }
 

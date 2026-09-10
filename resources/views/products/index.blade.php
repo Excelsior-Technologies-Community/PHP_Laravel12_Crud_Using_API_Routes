@@ -4,6 +4,8 @@
 <head>
 
     <title>Product Management API</title>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
 
     <style>
         * {
@@ -132,6 +134,52 @@
             padding: 10px;
             border: 1px solid #ccc;
             border-radius: 5px;
+        }
+
+        .search-box {
+            position: relative;
+        }
+
+        .suggestions {
+            position: absolute;
+            z-index: 5;
+            width: 100%;
+            top: 42px;
+            background: #fff;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, .12);
+            display: none;
+        }
+
+        .suggestions button {
+            width: 100%;
+            border: 0;
+            background: #fff;
+            padding: 10px;
+            text-align: left;
+            cursor: pointer;
+        }
+
+        .suggestions button:hover { background: #f1f5f9; }
+
+        .chart-panel {
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, .08);
+        }
+
+        .chart-wrap { height: 260px; }
+
+        .product-thumb {
+            width: 38px;
+            height: 38px;
+            object-fit: cover;
+            border-radius: 5px;
+            vertical-align: middle;
+            margin-right: 8px;
         }
 
         /* Table */
@@ -351,6 +399,11 @@
 
         </div>
 
+        <div class="chart-panel">
+            <h3>Sales overview</h3>
+            <div class="chart-wrap"><canvas id="salesChart"></canvas></div>
+        </div>
+
 
         <!-- STATISTICS -->
 
@@ -397,10 +450,10 @@
 
             <div class="filter-row">
 
-                <input
-                    type="text"
-                    id="search"
-                    placeholder="Search name or detail...">
+                <div class="search-box">
+                    <input type="text" id="search" placeholder="Search name or detail..." autocomplete="off">
+                    <div id="suggestions" class="suggestions"></div>
+                </div>
 
                 <input
                     type="number"
@@ -819,6 +872,7 @@
 
 
                     <td>
+                        ${product.image_path ? `<img class="product-thumb" src="/storage/${escapeHtml(product.image_path)}" alt="">` : ""}
                         ${escapeHtml(product.name)}
                     </td>
 
@@ -1056,6 +1110,46 @@
             loadProducts(page);
         }
 
+        let searchTimer;
+        document.getElementById("search").addEventListener("input", function () {
+            clearTimeout(searchTimer);
+            const term = this.value.trim();
+            const suggestions = document.getElementById("suggestions");
+            if (term.length < 2) {
+                suggestions.style.display = "none";
+                loadProducts(1);
+                return;
+            }
+
+            searchTimer = setTimeout(() => {
+                fetch(`/api/products/suggestions?q=${encodeURIComponent(term)}`, {
+                    headers: { "Accept": "application/json" }
+                })
+                    .then(response => response.json())
+                    .then(response => {
+                        suggestions.innerHTML = response.data.map(name =>
+                            `<button type="button">${escapeHtml(name)}</button>`
+                        ).join("");
+                        suggestions.style.display = response.data.length ? "block" : "none";
+                        suggestions.querySelectorAll("button").forEach(button => {
+                            button.onclick = () => {
+                                document.getElementById("search").value = button.innerText;
+                                suggestions.style.display = "none";
+                                loadProducts(1);
+                            };
+                        });
+                        loadProducts(1);
+                    })
+                    .catch(() => loadProducts(1));
+            }, 300);
+        });
+
+        document.addEventListener("click", event => {
+            if (!event.target.closest(".search-box")) {
+                document.getElementById("suggestions").style.display = "none";
+            }
+        });
+
 
         /*
         |--------------------------------------------------------------------------
@@ -1105,18 +1199,15 @@
         */
 
         function deleteProduct(id) {
-            if (
-                !confirm(
-                    "Move this product to trash?"
-                )
-            ) {
-
-                return;
-
-            }
-
-
-            fetch(`${API}/${id}`, {
+            Swal.fire({
+                title: "Move to trash?",
+                text: "You can restore this product later.",
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonText: "Yes, move it"
+            }).then(result => {
+                if (!result.isConfirmed) return;
+                return fetch(`${API}/${id}`, {
 
                     method: "DELETE",
 
@@ -1124,7 +1215,8 @@
                         "Accept": "application/json"
                     }
 
-                })
+                });
+            })
 
                 .then(response => {
 
@@ -1142,7 +1234,7 @@
 
                 .then(response => {
 
-                    alert(response.message);
+                    Swal.fire({ icon: "success", title: "Deleted", text: response.message, timer: 1200, showConfirmButton: false });
 
                     loadProducts(1);
 
@@ -1154,9 +1246,7 @@
 
                     console.error(error);
 
-                    alert(
-                        "Unable to delete product."
-                    );
+                    Swal.fire("Error", "Unable to delete product.", "error");
 
                 });
         }
@@ -1207,9 +1297,7 @@
 
                     console.error(error);
 
-                    alert(
-                        "Unable to update status."
-                    );
+                    Swal.fire("Error", "Unable to update status.", "error");
 
                 });
         }
@@ -1300,27 +1388,22 @@
 
             if (selected.length === 0) {
 
-                alert(
-                    "Please select at least one product."
-                );
+                Swal.fire("Select products", "Please select at least one product.", "info");
 
                 return;
 
             }
 
 
-            if (
-                !confirm(
-                    `Move ${selected.length} product(s) to trash?`
-                )
-            ) {
-
-                return;
-
-            }
-
-
-            fetch(
+            Swal.fire({
+                title: "Move selected products?",
+                text: `${selected.length} product(s) will be moved to trash.`,
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonText: "Yes, move them"
+            }).then(result => {
+                if (!result.isConfirmed) return;
+                return fetch(
                     `${API}/bulk-delete`, {
 
                         method: "POST",
@@ -1336,7 +1419,8 @@
                         })
 
                     }
-                )
+                );
+            })
 
                 .then(response => {
 
@@ -1354,7 +1438,7 @@
 
                 .then(response => {
 
-                    alert(response.message);
+                    Swal.fire({ icon: "success", title: "Deleted", text: response.message, timer: 1200, showConfirmButton: false });
 
                     loadProducts(1);
 
@@ -1366,9 +1450,7 @@
 
                     console.error(error);
 
-                    alert(
-                        "Unable to delete selected products."
-                    );
+                    Swal.fire("Error", "Unable to delete selected products.", "error");
 
                 });
         }
@@ -1627,6 +1709,34 @@
                 });
         }
 
+        function loadChart() {
+            fetch(`${API}/chart`, {
+                headers: { "Accept": "application/json" }
+            })
+                .then(response => response.json())
+                .then(response => {
+                    const chartData = response.data;
+                    new Chart(document.getElementById("salesChart"), {
+                        type: "bar",
+                        data: {
+                            labels: chartData.map(item => item.month),
+                            datasets: [{
+                                label: "Products created",
+                                data: chartData.map(item => item.products),
+                                backgroundColor: "#0d6efd",
+                                borderRadius: 5
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            scales: { y: { beginAtZero: true, ticks: { precision: 0 } } }
+                        }
+                    });
+                })
+                .catch(error => console.error("Unable to load chart", error));
+        }
+
 
         /*
         |--------------------------------------------------------------------------
@@ -1698,6 +1808,8 @@
         loadProducts(1);
 
         loadStatistics();
+
+        loadChart();
     </script>
 
 </body>
