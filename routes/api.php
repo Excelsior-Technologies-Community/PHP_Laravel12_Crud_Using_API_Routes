@@ -15,6 +15,16 @@ Route::get(
     [ProductController::class, 'statistics']
 );
 
+Route::get(
+    '/products/chart',
+    [ProductController::class, 'chart']
+);
+
+Route::get(
+    '/products/suggestions',
+    [ProductController::class, 'suggestions']
+);
+
 
 /*
 |--------------------------------------------------------------------------
