@@ -4,6 +4,7 @@
 <head>
 
     <title>Create Product</title>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <style>
         body {
@@ -92,6 +93,9 @@
                 step="0.01"
                 required>
 
+            <label for="image">Product image</label>
+            <input id="image" type="file" accept="image/jpeg,image/png,image/webp">
+
 
             <select id="status">
 
@@ -136,37 +140,25 @@
                 "Saving...";
 
 
-            fetch(API, {
+                const formData = new FormData();
+                formData.append("name", document.getElementById("product_name").value);
+                formData.append("detail", document.getElementById("detail").value);
+                formData.append("price", document.getElementById("price").value);
+                formData.append("status", document.getElementById("status").value);
+
+                const image = document.getElementById("image").files[0];
+                if (image) formData.append("image", image);
+
+                fetch(API, {
 
                     method: "POST",
 
                     headers: {
-
-                        "Content-Type": "application/json",
-
                         "Accept": "application/json"
 
                     },
 
-                    body: JSON.stringify({
-
-                        name: document.getElementById(
-                            "product_name"
-                        ).value,
-
-                        detail: document.getElementById(
-                            "detail"
-                        ).value,
-
-                        price: document.getElementById(
-                            "price"
-                        ).value,
-
-                        status: document.getElementById(
-                            "status"
-                        ).value
-
-                    })
+                    body: formData
 
                 })
 
@@ -189,13 +181,13 @@
 
                 .then(response => {
 
-                    alert(
-                        response.message
-                    );
-
-
-                    location.href =
-                        "/products";
+                    Swal.fire({
+                        icon: "success",
+                        title: "Product created",
+                        text: response.message,
+                        timer: 1400,
+                        showConfirmButton: false
+                    }).then(() => location.href = "/products");
 
                 })
 
@@ -214,13 +206,11 @@
                             .join("\n");
 
 
-                        alert(messages);
+                        Swal.fire("Validation error", messages, "error");
 
                     } else {
 
-                        alert(
-                            "Unable to create product."
-                        );
+                        Swal.fire("Error", "Unable to create product.", "error");
 
                     }
 

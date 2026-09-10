@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Product;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class ProductController extends Controller
@@ -191,6 +192,49 @@ class ProductController extends Controller
         ]);
     }
 
+    /**
+     * GET: Dashboard chart data
+     */
+    public function chart()
+    {
+        $data = Product::query()
+            ->selectRaw("DATE_FORMAT(created_at, '%Y-%m') as month")
+            ->selectRaw('COUNT(*) as products')
+            ->selectRaw('SUM(price) as revenue')
+            ->where('created_at', '>=', now()->subMonths(5)->startOfMonth())
+            ->groupBy('month')
+            ->orderBy('month')
+            ->get();
+
+        return response()->json([
+            'status' => true,
+            'data' => $data,
+        ]);
+    }
+
+    /**
+     * GET: Product name suggestions for live search
+     */
+    public function suggestions(Request $request)
+    {
+        $term = trim((string) $request->get('q', ''));
+
+        if (mb_strlen($term) < 2) {
+            return response()->json(['status' => true, 'data' => []]);
+        }
+
+        $suggestions = Product::query()
+            ->where('name', 'like', "%{$term}%")
+            ->orderBy('name')
+            ->limit(8)
+            ->pluck('name');
+
+        return response()->json([
+            'status' => true,
+            'data' => $suggestions,
+        ]);
+    }
+
 
     /**
      * POST: Store Product
@@ -205,7 +249,13 @@ class ProductController extends Controller
             'price' => 'required|numeric|min:0',
 
             'status' => 'nullable|in:active,inactive',
+
+            'image' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
         ]);
+
+        $imagePath = $request->hasFile('image')
+            ? $request->file('image')->store('products', 'public')
+            : null;
 
         $product = Product::create([
             'name' => $validated['name'],
@@ -215,6 +265,8 @@ class ProductController extends Controller
             'price' => $validated['price'],
 
             'status' => $validated['status'] ?? 'active',
+
+            'image_path' => $imagePath,
         ]);
 
         return response()->json([
@@ -255,9 +307,21 @@ class ProductController extends Controller
             'price' => 'required|numeric|min:0',
 
             'status' => 'nullable|in:active,inactive',
+
+            'image' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
         ]);
 
         $product = Product::findOrFail($id);
+
+        $imagePath = $product->image_path;
+
+        if ($request->hasFile('image')) {
+            if ($imagePath) {
+                Storage::disk('public')->delete($imagePath);
+            }
+
+            $imagePath = $request->file('image')->store('products', 'public');
+        }
 
         $product->update([
             'name' => $validated['name'],
@@ -268,6 +332,8 @@ class ProductController extends Controller
 
             'status' => $validated['status']
                 ?? $product->status,
+
+            'image_path' => $imagePath,
         ]);
 
         return response()->json([
